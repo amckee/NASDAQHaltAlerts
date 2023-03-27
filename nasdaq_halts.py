@@ -17,8 +17,9 @@ most_halts = Counter(halts).most_common(3)
 stroutput = "Symbols that halted the most:\r\n"
 
 for halt in most_halts:
-    stroutput += ( "%s : %s" % (halt[0], halt[1]) )
-    stroutput += "\r\n"
+    if halt[1] > 1:
+        stroutput += ( "%s : %s" % (halt[0], halt[1]) )
+        stroutput += "\r\n"
 
 obj = dbus.SessionBus().get_object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
 obj = dbus.Interface(obj, "org.freedesktop.Notifications")
