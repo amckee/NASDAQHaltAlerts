@@ -1,6 +1,6 @@
 #!/bin/python
 
-import feedparser, subprocess
+import feedparser, dbus
 from collections import Counter
 
 url = "http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts"
@@ -20,4 +20,6 @@ for halt in most_halts:
     stroutput += ( "%s : %s" % (halt[0], halt[1]) )
     stroutput += "\r\n"
 
-subprocess.run( ["notify-send", "-i", "./usd.svg", "-a", "NASDAQ Halts", stroutput])
+obj = dbus.SessionBus().get_object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
+obj = dbus.Interface(obj, "org.freedesktop.Notifications")
+obj.Notify("NASDAQ Halts", 0, "", "NASDAQ Halts", stroutput, [], {"urgency": 1}, 2000)
