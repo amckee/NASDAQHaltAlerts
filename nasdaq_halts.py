@@ -1,27 +1,23 @@
 #!/bin/python
 
-import os,requests,pandas,json
+import feedparser, subprocess
+from collections import Counter
 
-url = "https://www.nasdaqtrader.com/RPCHandler.axd"
+url = "http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts"
 
-headers = {
-    'content-type': 'application/json',
-    'authority': 'www.nasdaqtrader.com',
-    'accept': '*/*',
-    'sec-fetch-site': 'same-origin',
-    'referer': 'https://www.nasdaqtrader.com/Trader.aspx?id=TradeHalts',
-    'accept-language': 'en-US,en;q=0.9',
-    }
+feed = feedparser.parse( url )
 
-data = {'id': 6,
-    'method':'BL_TradeHalt.GetTradeHalts',
-    "params":"[]",
-    "version":"1.1"
-    }
+halts = []
 
-r = requests.post(url, data=json.dumps(data), headers=headers)
+for entry in feed.entries:
+    halts.append( entry.ndaq_issuesymbol )
 
-if r.status_code == 200:
-    from bs4 import BeautifulSoup
-    src = BeautifulSoup( r.text, "lxml" )
-    
+most_halts = Counter(halts).most_common(3)
+
+stroutput = "Symbols that halted the most:\r\n"
+
+for halt in most_halts:
+    stroutput += ( "%s : %s" % (halt[0], halt[1]) )
+    stroutput += "\r\n"
+
+subprocess.run( ["notify-send", "-i", "./usd.svg", "-a", "NASDAQ Halts", stroutput])
